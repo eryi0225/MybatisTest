@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper>
+    
+    <!--这是一个Mybatis动态测试的练习-->
+    <!--if测试-->
+    <select id="findActiveBlogWithTitleLike" resultType="Blog">
+        select * from BLOG WHERE state = 'ACTIVE'
+        <if test="title != null">
+            AND title LIKE #{title}
+        </if>
+    </select>
+
+    <select id="findActiveBlogLike" resultType="Blog">
+        SELECT  * from BLOG WHERE state = 'ACTIVE'
+        <if test="title != null">
+            AND title like #{title}
+        </if>
+        <if test="author != null and author.name!=null">
+            AND author_name = #{author.name}
+        </if>
+    </select>
+
+    <!--测试choose，when,otherwise语句-->
+    <select id="findActiveBlogLike"
+            resultType="Blog">
+        SELECT * FROM BLOG WHERE state = 'ACTIVE'
+        <choose>
+            <when test="title != null">
+                AND title like #{title}
+            </when>
+            <when test="author != null and author.name != null">
+                AND author_name like #{author.name}
+            </when>
+            <otherwise>
+                AND featured = 1
+            </otherwise>
+        </choose>
+    </select>
+
+    <!--测试trim,where,set的使用-->
+    <select id="findActiveBlogLike"
+            resultType="Blog">
+        SELECT * FROM BLOG
+        <where>
+            <if test="state != null">
+                state = #{state}
+            </if>
+            <if test="title != null">
+                AND title like #{title}
+            </if>
+            <if test="author != null and author.name != null">
+                AND author_name like #{author.name}
+            </if>
+        </where>
+        <trim prefix="WHERE" prefixOverrides="AND |OR "> ... </trim>
+    </select>
+
+    <update id="updateAuthorIfNecessary">
+        update Author
+        <set>
+            <if test="username != null">username=#{username},</if>
+            <if test="password != null">password=#{password},</if>
+            <if test="email != null">email=#{email},</if>
+            <if test="bio != null">bio=#{bio}</if>
+        </set>
+        <trim prefix="SET" suffixOverrides=","> ... </trim>
+        where id=#{id}
+    </update>
+
+    <!--for each的使用-->
+    <select id="selectPostIn" resultType="domain.blog.Post">
+        SELECT *
+        FROM POST P
+        WHERE ID in
+        <foreach item="item" index="index" collection="list"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+    
+</mapper>
